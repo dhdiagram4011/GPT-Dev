@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원정보 리스트</title>
+</head>
+<body>
+    {% for user in users %}
+<li style="list-style-type:none;">
+    <h4> ID(가입자아이디) : {{ user.username }}</h4>
+    <h4>==============================================</h4>
+</li>
+    {% endfor %}
+</body>
+</html>

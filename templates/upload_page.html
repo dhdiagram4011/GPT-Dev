@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>텍스트 분석기</title>
+</head>
+
+<body>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <div id="app">
+        <h4>텍스트 분석기</h4>
+        <p>현재 로그인 사용자 : {{ username }}</p>
+        <p>현재 발급되어 있는 토큰 : {{ new_token }}</p>
+        <p>로그인 만료시간 : {{ expiration_kst }}</p>
+        <input type="file" @change="onFileChange" />
+        <button @click="uploadFile">업로드</button>
+        <button @click="saveTextAsFile">텍스트 파일로 저장하기</button>
+        <div v-if="responseData">
+            <div v-html="formattedResponse"></div>
+        </div>
+        <div v-if="wciu && mpli">
+            <p><strong>업로드한 문서에 사용된 단어의 빈도수 데이터 표출</strong></p>  <!--워드클라우드/mathplot 데이터 표시 -->
+            <img :src="wciu" alt="">
+            <img :src="mpli" alt="">
+        </div>
+    </div>
+
+    <script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                selectedFile: null,
+                responseData: null,
+                formattedResponse: null,
+                username: null,
+                new_token: null,
+                expiration_kst : null,
+                wciu: `imagetotext/public/wc_image01.png`, //default : public
+                mpli: `imagetotext/public/wc_image02.png`, //default : public
+                loginForm: {
+                    username: "",
+                    password: "",
+                },
+            };
+        },
+        methods: {
+        onFileChange(event) {
+            this.selectedFile = event.target.files[0];
+        },
+        async uploadFile() {
+            console.log("uploadFile called");
+            if (this.selectedFile) {
+                const formData = new FormData();
+                formData.append("file", this.selectedFile);
+                try {
+                    const response = await axios.post("http://localhost:8000/upload" , formData, {
+                        headers: { 
+                            "Content-Type" : "multipart/form-data",
+                            "Authorization" : `Bearer ${this.new_token}`, 
+                        },
+                        withCredentials: true,
+                    });
+                    this.responseData = response.data.extr_txt; //데이터 출력부분
+                    this.formattedResponse = this.responseData.replace(/\n/g, '<br/>')
+                    console.log("응답 :",  response.data);
+                } catch (error) {
+                    console.error("업로드 오류 :", error);
+                }
+            } else {
+                console.error("파일을 선택하세요.");
+                }
+            },
+            saveTextAsFile() {
+                if (this.responseData) {
+                    const blob = new Blob([this.responseData], { type: "text/plain" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "document.txt"
+                    a.click();
+                    URL.revokeObjectURL(url);
+                } else {
+                    console.error("응답 데이터가 없습니다.")
+                }
+            },
+        },
+        mounted() {
+            axios.get('/api/userdata')
+                .then(response => {
+                    this.username = response.data.username;
+                    this.new_token = response.data.new_token;
+                    this.expiration_kst = response.data.expiration_kst;
+                })
+                .catch(error => {
+                    console.error('Error fetching user data', error)
+                });
+        },
+    });
+    </script>
+</body>
+</html>

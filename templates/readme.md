@@ -1,7 +1,7 @@
-#회원가입 페이지
-- 계정별 관리 데이터(itt_user/data)
-  - 계정리스트(account_list)
-  - 회원별 파일 업로드 리스트(file_list)
-
-  #DB >> mongodb
-
+#####
+1. 회원가입(username, password) - 완료 
+2. 회원가입정보 DB저장 - 완료 
+3. 로그인 - 완료
+4. token 기반 - 완료
+5. pdf to text 데이터, wordcloud 데이터 저장 (username 기반으로 사용자가 진행한 pdf to text, wordcloud 데이터 조회가능하도록 구성) 
+#####
